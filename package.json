@@ -10,9 +10,11 @@
   "author": "junior_santos2100@outlook.com",
   "license": "ISC",
   "dependencies": {
+    "mongoose": "^5.10.6",
     "restify": "6.3.4"
   },
   "devDependencies": {
+    "@types/mongoose": "^5.7.36",
     "@types/restify": "5.0.11"
   }
 }
