@@ -3,6 +3,7 @@ import * as restify from 'restify'
 
 import { environment } from '../common/environment'
 import { Router } from '../common/router'
+import { mergePatchBodyParser } from './merge-patch.parser'
 
 
 export class Server {
@@ -25,6 +26,8 @@ export class Server {
         })
 
         this.application.use(restify.plugins.queryParser())
+        this.application.use(restify.plugins.bodyParser())
+        this.application.use(mergePatchBodyParser)
 
         routers.forEach(router => router.applyRoutes(this.application))
 
