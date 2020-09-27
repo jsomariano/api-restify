@@ -1,6 +1,7 @@
 import { Router } from '../common/router'
 import * as restify from 'restify'
 import { User } from './users.model'
+import { NotFoundError } from 'restify-errors'
 
 class UsersRouter extends Router {
 
@@ -17,35 +18,43 @@ class UsersRouter extends Router {
     application.get('/users', (req, res, next) => {
       User.find()
         .then(this.render(res, next))
+        .catch(next)
     })
 
     application.get('/users/:userId', (req, res, next) => {
       User.findById(req.params.userId)
         .then(this.render(res, next))
+        .catch(next)
     })
 
     application.post('/users', (req, res, next) => {
       let user = new User(req.body)
-      user.save().then(this.render(res, next))
+
+      user.save()
+        .then(this.render(res, next))
+        .catch(next)
     })
 
     application.put('/users/:userId', (req, res, next) => {
-      const options = { overwrite: true }
+      const options = { runValidators: true, overwrite: true }
       User.update({ _id: req.params.userId }, req.body, options)
         .exec()
         .then(result => {
           if (result.n) {
             return User.findById(req.params.userId)
           } else {
-            res.send(404)
+            throw new NotFoundError('Documento não encontrado.')
           }
-        }).then(this.render(res, next))
+        })
+        .then(this.render(res, next))
+        .catch(next)
     })
 
     application.patch('/users/:userId', (req, res, next) => {
-      const options = { new: true }
+      const options = { runValidators: true, new: true }
       User.findByIdAndUpdate(req.params.userId, req.body, options)
         .then(this.render(res, next))
+        .catch(next)
     })
 
     application.del('/users/:userId', (req, res, next) => {
@@ -56,10 +65,11 @@ class UsersRouter extends Router {
             res.send(204)
             return next()
           } else {
-            res.send(404)
+            throw new NotFoundError('Documento não encontrado.')
           }
           return next()
         })
+        .catch(next)
     })
 
   }
