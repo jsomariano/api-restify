@@ -1,12 +1,13 @@
-import { Router } from '../common/router'
+import { ModelRouter } from '../common/model-router'
+
 import * as restify from 'restify'
 import { User } from './users.model'
 import { NotFoundError } from 'restify-errors'
 
-class UsersRouter extends Router {
+class UsersRouter extends ModelRouter<User> {
 
   constructor() {
-    super()
+    super(User)
 
     this.on('beforeRender', document => {
       document.password = undefined
@@ -15,62 +16,17 @@ class UsersRouter extends Router {
 
   applyRoutes(application: restify.Server) {
 
-    application.get('/users', (req, res, next) => {
-      User.find()
-        .then(this.render(res, next))
-        .catch(next)
-    })
+    application.get('/users', this.findAll)
 
-    application.get('/users/:userId', (req, res, next) => {
-      User.findById(req.params.userId)
-        .then(this.render(res, next))
-        .catch(next)
-    })
+    application.get('/users/:id', [this.validateId, this.findById])
 
-    application.post('/users', (req, res, next) => {
-      let user = new User(req.body)
+    application.post('/users', this.save)
 
-      user.save()
-        .then(this.render(res, next))
-        .catch(next)
-    })
+    application.put('/users/:id', [this.validateId, this.replace])
 
-    application.put('/users/:userId', (req, res, next) => {
-      const options = { runValidators: true, overwrite: true }
-      User.update({ _id: req.params.userId }, req.body, options)
-        .exec()
-        .then(result => {
-          if (result.n) {
-            return User.findById(req.params.userId)
-          } else {
-            throw new NotFoundError('Documento não encontrado.')
-          }
-        })
-        .then(this.render(res, next))
-        .catch(next)
-    })
+    application.patch('/users/:id', [this.validateId, this.update])
 
-    application.patch('/users/:userId', (req, res, next) => {
-      const options = { runValidators: true, new: true }
-      User.findByIdAndUpdate(req.params.userId, req.body, options)
-        .then(this.render(res, next))
-        .catch(next)
-    })
-
-    application.del('/users/:userId', (req, res, next) => {
-      User.remove({ _id: req.params.userId })
-        .exec()
-        .then((cmdResult: any) => {
-          if (cmdResult.n) {
-            res.send(204)
-            return next()
-          } else {
-            throw new NotFoundError('Documento não encontrado.')
-          }
-          return next()
-        })
-        .catch(next)
-    })
+    application.del('/users/:id', [this.validateId, this.delete])
 
   }
 }
