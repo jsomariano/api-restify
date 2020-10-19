@@ -1,45 +1,28 @@
 {
   "name": "meat-api",
   "version": "1.0.0",
-  "description": "API de Restaurantes",
+  "description": "Api para restaurantes",
   "main": "index.js",
   "scripts": {
-    "test": "jest"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "tsc && concurrently \"tsc -w\" \"nodemon dist/main.js\""
   },
   "keywords": [],
-  "author": "",
+  "author": "junior_santos2100@outlook.com",
   "license": "ISC",
-  "jest": {
-    "testEnvironment": "node",
-    "transform": {
-      "^.+\\.tsx?$": "ts-jest"
-    },
-    "testRegex": "(/__tests__/.*|(\\.|/)(test|spec))\\.(jsx?|tsx?)$",
-    "moduleFileExtensions": [
-      "ts",
-      "tsx",
-      "js",
-      "jsx",
-      "json",
-      "node"
-    ]
-  },
   "dependencies": {
-    "bcrypt": "1.0.3",
-    "mongoose": "4.13.9",
-    "restify": "6.3.4",
-    "restify-errors": "5.0.0"
+    "bcrypt": "^5.0.0",
+    "mongoose": "^5.10.6",
+    "restify": "6.3.4"
   },
   "devDependencies": {
     "@types/bcrypt": "1.0.0",
-    "@types/jest": "22.1.2",
-    "@types/mongoose": "4.7.32",
-    "@types/restify": "5.0.6",
+    "@types/mongoose": "^5.7.36",
+    "@types/restify": "5.0.11",
     "@types/restify-errors": "4.3.2",
-    "@types/supertest": "2.0.4",
-    "jest": "22.4.2",
-    "supertest": "3.0.0",
-    "ts-jest": "22.0.4",
-    "typescript": "2.6.2"
+    "concurrently": "^5.3.0"
+  },
+  "peerDependencies": {
+    "restify-errors": "5.0.0"
   }
 }
