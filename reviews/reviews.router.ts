@@ -1,37 +1,37 @@
-import { ModelRouter } from '../common/model-router'
-
 import * as restify from 'restify'
-import { Review } from './reviews.model'
 import * as mongoose from 'mongoose'
+import {ModelRouter} from '../common/model-router'
+import {Review} from './reviews.model'
 
-class ReviewsRouter extends ModelRouter<Review> {
-  constructor() {
+class ReviewsRouter extends ModelRouter<Review>{
+  constructor(){
     super(Review)
   }
 
-  protected prepareOne(query: mongoose.DocumentQuery<Review, Review>)
-    : mongoose.DocumentQuery<Review, Review> {
-    return query
-      .populate('user', 'name')
-      .populate('restaurant', 'name')
+  protected prepareOne(query: mongoose.DocumentQuery<Review,Review>): mongoose.DocumentQuery<Review,Review>{
+    return query.populate('user', 'name')
+                .populate('restaurant', 'name')
   }
 
-  /*findById = (req, res, next) => {
+  envelope(document){
+    let resource = super.envelope(document)
+    const restId = document.restaurant._id ? document.restaurant._id : document.restaurant
+    resource._links.restaurant = `/restaurants/${restId}`
+    return resource
+  }
+
+  /*findById = (req, resp, next)=>{
     this.model.findById(req.params.id)
-      .populate('user', 'name')
-      .populate('restaurant', "name")
-      .then(this.render(res, next))
-      .catch(next)
-  }
-  */
+        .populate('user', 'name')
+        .populate('restaurant', 'name')
+        .then(this.render(resp, next))
+        .catch(next)
+  }*/
 
-  applyRoutes(application: restify.Server) {
-
-    application.get('/reviews', this.findAll)
-
-    application.get('/reviews/:id', [this.validateId, this.findById])
-
-    application.post('/reviews', this.save)
+  applyRoutes(application: restify.Server){
+    application.get(`${this.basePath}`, this.findAll)
+    application.get(`${this.basePath}/:id`, [this.validateId, this.findById])
+    application.post(`${this.basePath}`, this.save)
   }
 }
 
