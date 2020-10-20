@@ -49,4 +49,11 @@ export class Server {
         .then(() => this)
     ))
   }
+
+  shutdown() {
+    return mongoose.disconnect().then(() => {
+      this.application.close()
+    })
+  }
+
 }
