@@ -5,11 +5,13 @@ import { environment } from '../common/environment'
 import { usersRouter } from './users.router'
 import { User } from './users.model'
 
-let address: string = (<any>global).address
+const address: string = (<any>global).address
+const auth: string = (<any>global).auth
 
 test('get /users', () => {
   return request(address)
     .get('/users')
+    .set('Authorization', auth)
     .then(response => {
       expect(response.status).toBe(200)
       expect(response.body.items).toBeInstanceOf(Array)
@@ -20,6 +22,7 @@ test('get /users', () => {
 test('post /users', () => {
   return request(address)
     .post('/users')
+    .set('Authorization', auth)
     .send({
       name: "Usuario Teste",
       email: "usuario_test@email.com",
@@ -40,6 +43,7 @@ test('post /users', () => {
 test('get /users/aaaaa - not found', () => {
   return request(address)
     .get('/users/aaaaa')
+    .set('Authorization', auth)
     .then(response => {
       expect(response.status).toBe(404)
     })
@@ -49,6 +53,7 @@ test('get /users/aaaaa - not found', () => {
 test('patch /users/:id', () => {
   return request(address)
     .post('/users')
+    .set('Authorization', auth)
     .send({
       name: "Usuario teste alterado",
       email: "usuario_test_alterado@email.com",
