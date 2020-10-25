@@ -1,5 +1,5 @@
 const dbUser = "futirstanjo"
-const dbPassword = "******"
+const dbPassword = "*********"
 
 export const environment = {
   server: { port: process.env.SERVER_PORT || 3000 },

@@ -10,13 +10,7 @@ export abstract class Router extends EventEmitter {
   }
 
   envelopeAll(documents: any[], options: any = {}): any {
-    const resource: any = {
-      _links: {
-        self: ``
-      },
-      items: documents
-    }
-    return resource
+    return documents
   }
 
   render(response: restify.Response, next: restify.Next) {
