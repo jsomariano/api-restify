@@ -1,5 +1,5 @@
 const dbUser = "futirstanjo"
-const dbPassword = "*********"
+const dbPassword = "******"
 
 export const environment = {
   server: { port: process.env.SERVER_PORT || 3000 },
@@ -17,6 +17,9 @@ export const environment = {
   db_test: {
     url: process.env.DB_URL
       || `mongodb+srv://${dbUser}:${dbPassword}@cluster0.lajjj.gcp.mongodb.net/meat-api-test`
+  },
+  log: {
+    level: process.env.LOG_LEVEL || 'debug',
+    name: 'meat-api-logger'
   }
-
 }
