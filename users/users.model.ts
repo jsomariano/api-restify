@@ -7,10 +7,13 @@ export interface User extends mongoose.Document {
   name: String,
   email: String,
   password: String,
+  profiles: string[],
+  matches(password: string): boolean,
+  hasAny(...profiles: string[]): boolean,
 }
 
 export interface UserModel extends mongoose.Model<User> {
-  findByEmail(email: string): Promise<User>
+  findByEmail(email: string, projection?: string): Promise<User>
 }
 
 const regexEmail = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
@@ -45,11 +48,23 @@ const userSchema = new mongoose.Schema({
       validator: validateCPF,
       message: '{PATH}: Invalid CPF ({VALUE})'
     }
+  },
+  profiles: {
+    type: [String],
+    required: false,
   }
 })
 
-userSchema.statics.findByEmail = function (email: string) {
-  return this.findOne({ email })
+userSchema.methods.hasAny = function (...profiles: string[]): boolean {
+  return profiles.some(profile => this.profiles.indexOf(profile) !== -1)
+}
+
+userSchema.statics.findByEmail = function (email: string, projection: string) {
+  return this.findOne({ email }, projection)
+}
+
+userSchema.methods.matches = function (password: string): boolean {
+  return bcrypt.compareSync(password, this.password)
 }
 
 const hashPassword = (obj, next) => {
