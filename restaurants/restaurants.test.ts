@@ -7,9 +7,9 @@ import {environment} from '../common/environment'
 let address: string = (<any>global).address
 const auth: string = (<any>global).auth
 
-test('get /reviews', ()=>{
+test('get /restaurants', ()=>{
   return request(address)
-         .get('/reviews')
+         .get('/restaurants')
          .then(response=>{
            expect(response.status).toBe(200)
            expect(response.body.items).toBeInstanceOf(Array)
@@ -17,9 +17,9 @@ test('get /reviews', ()=>{
          .catch(fail)
 })
 
-test('get /reviews/aaaaa - not found', ()=>{
+test('get /restaurants/aaaaa - not found', ()=>{
   return request(address)
-         .get('/reviews/aaaaa')
+         .get('/restaurants/aaaaa')
          .then(response=>{
            expect(response.status).toBe(404)
          })
@@ -27,27 +27,24 @@ test('get /reviews/aaaaa - not found', ()=>{
 })
 
 /*
-  Exemplo de como pode ser um post para reviews
+  Exemplo de como pode ser um post para restaurants
 */
 
-test('post /reviews', ()=>{
+test('post /restaurants', ()=>{
   return request(address)
-            .post('/reviews')
+            .post('/restaurants')
             .set('Authorization', auth)
             .send({
-              date: '2018-02-02T20:20:20',
-              rating: 4,
-              comments: 'ok',
-              user: new mongoose.Types.ObjectId(),
-              restaurant: new mongoose.Types.ObjectId()
+              name: 'Burger House',
+              menu: [{name: "Coke", price: 5}]
             })
             .then(response=>{
               expect(response.status).toBe(200)
               expect(response.body._id).toBeDefined()
-              expect(response.body.rating).toBe(4)
-              expect(response.body.comments).toBe('ok')
-              expect(response.body.user).toBeDefined()
-              expect(response.body.restaurant).toBeDefined()
+              expect(response.body.name).toBe('Burger House')
+              expect(response.body.menu).toBeInstanceOf(Array)
+              expect(response.body.menu).toHaveLength(1)
+              expect(response.body.menu[0]).toMatchObject({name: "Coke", price: 5})
             })
             .catch(fail)
 })

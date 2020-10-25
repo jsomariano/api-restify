@@ -1,0 +1,32 @@
+stages:
+  - test
+  - deploy
+
+cache:
+  paths:
+    - node_modules/
+
+test:
+  stage: test
+  image: beevelop/nodejs-python
+  variables:
+    SERVER_PORT: 3001
+    DB_URL: "mongodb://mongo/meatapi"
+  services:
+    - mongo
+  script:
+    - npm i
+    - npm test
+
+deploy:
+  stage: deploy
+  image: rastasheep/ubuntu-sshd
+  before_script:
+    - mkdir -p ~/.ssh
+    - echo "$DEPLOY_KEY" | tr -d '\r' > ~/.ssh/id_rsa
+    - chmod 600 ~/.ssh/id_rsa
+    - eval "$(ssh-agent -s)"
+    - ssh-add ~/.ssh/id_rsa
+    - ssh-keyscan -H $DEPLOY_SERVER >> ~/.ssh/known_hosts
+  script:
+    - ssh deploy@$DEPLOY_SERVER "source ~/.nvm/nvm.sh; cd meat-api; git pull; npm i; npm run build; cd; pm2 startOrReload ecosystem.config.js"

@@ -1,70 +1,58 @@
-import { ModelRouter } from '../common/model-router'
-
+import {ModelRouter} from '../common/model-router'
 import * as restify from 'restify'
-import { Restaurant } from './restaurants.model'
-import { NotFoundError } from 'restify-errors'
+import {NotFoundError} from 'restify-errors'
+import {Restaurant} from './restaurants.model'
+import {authorize} from '../security/authz.handler'
 
-class RestaurantRouter extends ModelRouter<Restaurant> {
-
-  constructor() {
+class RestaurantsRouter extends ModelRouter<Restaurant> {
+  constructor(){
     super(Restaurant)
   }
 
-  envelope(document) {
+  envelope(document){
     let resource = super.envelope(document)
     resource._links.menu = `${this.basePath}/${resource._id}/menu`
     return resource
   }
 
-  findMenu = (req, res, next) => {
+  findMenu = (req, resp, next) => {
     Restaurant.findById(req.params.id, "+menu")
-      .then(restaurant => {
-        if (!restaurant) {
-          throw new NotFoundError("Restaurant not found")
-        } else {
-          res.json(restaurant.menu)
-          return next()
-        }
-      })
+       .then(rest =>{
+         if(!rest){
+           throw new NotFoundError('Restaurant not found')
+         }else{
+           resp.json(rest.menu)
+           return next()
+         }
+       }).catch(next)
   }
 
-  replaceMenu = (req, res, next) => {
-    Restaurant.findById(req.params.id)
-      .then(restaurant => {
-        if (!restaurant) {
-          throw new NotFoundError("Restaurant not found")
-        } else {
-          restaurant.menu = req.body //ARRAY de menu
-          return restaurant.save()
+  replaceMenu = (req, resp, next)=>{
+      Restaurant.findById(req.params.id).then(rest=>{
+        if(!rest){
+          throw new NotFoundError('Restaurant not found')
+        }else{
+          rest.menu = req.body //ARRAY de MenuItem
+          return rest.save()
         }
-      }).then((restaurant) => {
-        res.json(restaurant.menu)
+      }).then(rest=>{
+        resp.json(rest.menu)
         return next()
-      })
-      .catch(next)
+      }).catch(next)
   }
 
-  applyRoutes(application: restify.Server) {
+  applyRoutes(application: restify.Server){
+    application.get(`${this.basePath}`, this.findAll)
+    application.get(`${this.basePath}/:id`, [this.validateId, this.findById])
+    application.post(`${this.basePath}`, [authorize('admin'),this.save])
+    application.put(`${this.basePath}/:id`, [authorize('admin'),this.validateId,this.replace])
+    application.patch(`${this.basePath}/:id`, [authorize('admin'),this.validateId,this.update])
+    application.del(`${this.basePath}/:id`, [authorize('admin'),this.validateId,this.delete])
 
-    application.get('/restaurants', this.findAll)
-
-    application.get('/restaurants/:id', [this.validateId, this.findById])
-
-    application.post('/restaurants', this.save)
-
-    application.put('/restaurants/:id', [this.validateId, this.replace])
-
-    application.patch('/restaurants/:id', [this.validateId, this.update])
-
-    application.del('/restaurants/:id', [this.validateId, this.delete])
-
-
-    //menu routers
-    application.get('/restaurants/:id/menu', [this.validateId, this.findMenu])
-
-    application.put('/restaurants/:id/menu', [this.validateId, this.replaceMenu])
-
+    application.get(`${this.basePath}/:id/menu`, [this.validateId, this.findMenu])
+    application.put(`${this.basePath}/:id/menu`, [authorize('admin'),this.validateId, this.replaceMenu])
   }
+
 }
 
-export const restaurantRouter = new RestaurantRouter()
+export const restaurantsRouter = new RestaurantsRouter()

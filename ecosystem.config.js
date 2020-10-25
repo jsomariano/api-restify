@@ -7,7 +7,8 @@ module.exports = {
     watch: true,
     merge_logs: true,
     env: {
-      SERVER_PORT: 5000,      
+      SERVER_PORT: 5000,
+      DB_URL: 'mongodb://localhost/meat-api',
       NODE_ENV: "development"
     },
     env_production: {
